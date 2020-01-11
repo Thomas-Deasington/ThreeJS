@@ -15,7 +15,7 @@ const Scene = {
         mouse: new THREE.Vector2(),
         raycaster: new THREE.Raycaster(),
         animSpeed: null,
-        animPercent: null
+        animPercent: null,
     },
     init: () => {
         let vars = Scene.vars;
@@ -146,7 +146,7 @@ const Scene = {
                         Scene.loadFBX("Logo_Feelity.FBX", 10, [45, 22, 0], [0, Math.PI, Math.PI],0xFFFFFF, "logo1", () => {
                             
                             Scene.loadText(Scene.vars.text, 10, [0,33,46], [0, 0, 0], 0x1A1A1A, "texte",() =>{
-                                Scene.loadText("Play", 15, [0,250,-200], [0, 0, 0], 0x1A1A1A, "texte2",() =>{
+                                Scene.loadText("Play", 15, [0,250,-210], [0, 0, 0], 0x1A1A1A, "texte2",() =>{
 
                             
                             
@@ -219,6 +219,8 @@ const Scene = {
                                 var meshCube = new THREE.Mesh( geometry, material );
                                 meshCube.position.z = -250;
                                 meshCube.position.y = 250;
+
+
                                 cube.add(meshCube);
                                 cube.add(Scene.vars.texte2);
                                 Scene.vars.cubeGroup = cube;
@@ -375,12 +377,14 @@ const Scene = {
                 var color = new THREE.Color( 0xffffff );
                 color.setHex( Math.random() * 0xffffff );
                 Scene.vars.cubeGroup.children[0].material.color = new THREE.Color(color);
-                Scene.animationCube();
+                var compteur = 0;
+                while(compteur!=300){
+                    Scene.vars.silverGroup.children[2].rotation.x -= 1;
+                    Scene.vars.bronzeGroup.children[2].rotation.x -= 1;  
+                    compteur++;
+                }
             }
         }
-    },
-    animationCube: () =>{
-
     },
     //affiche une image; connecte la camera à la scene
     render: () => {
