@@ -302,7 +302,7 @@ const Scene = {
     loadText: (text, echelle, position, rotation, couleur, namespace, callback) =>{
         let loader = new THREE.FontLoader();
 
-        loader.load('helvetiker_regular.typeface.json', (font) =>{
+        loader.load('fonts/helvetiker_regular.typeface.json', (font) =>{
             let geometry = new THREE.TextGeometry(text, {
                 font: font,
                 size: 1,
