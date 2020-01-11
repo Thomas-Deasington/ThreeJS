@@ -39,16 +39,6 @@ const Scene = {
         vars.renderer.shadowMap.enabled = true;
         vars.renderer.shadowMapSoft = true; 
 
-        // directional.castShadow = true;
-        // let d = 1000;
-        // directional.shadow.camera.left = -d;
-        // directional.shadow.camera.right = d;
-        // directional.shadow.camera.top = d;
-        // directional.shadow.camera.bottom = -d;
-        // directional.shadow.camera.far = 2000;
-        // directional.shadow.mapSize.width = 4096;
-        // directional.shadow.mapSize.height = 4096;
-
         //Création de la caméra : 45 pour 45° de vision
         vars.camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 1, 2000);
         //par défaut caméra à moitier dans le sol, donc on la remonte et on la recule pour mieux voir
@@ -156,6 +146,7 @@ const Scene = {
                         Scene.loadFBX("Logo_Feelity.FBX", 10, [45, 22, 0], [0, Math.PI, Math.PI],0xFFFFFF, "logo1", () => {
                             
                             Scene.loadText(Scene.vars.text, 10, [0,33,46], [0, 0, 0], 0x1A1A1A, "texte",() =>{
+                                Scene.loadText("Play", 15, [0,250,-200], [0, 0, 0], 0x1A1A1A, "texte2",() =>{
 
                             
                             
@@ -168,7 +159,7 @@ const Scene = {
                                 trophy.add(Scene.vars.logo1);
 
                                 trophy.add(Scene.vars.texte);
-                                
+
                                 trophy.position.z = -50;
                                 trophy.position.y = 10;
 
@@ -219,10 +210,24 @@ const Scene = {
                                 vars.scene.add(trophy);
                                 vars.scene.add(trophy2);
                                 vars.scene.add(trophy3);
+
+                                //Rajout d'un cube
+                                let cube = new THREE.Group();
+
+                                var geometry = new THREE.BoxGeometry( 70, 70, 70 );
+                                var material = new THREE.MeshBasicMaterial( {color: 0xFF0000} );
+                                var meshCube = new THREE.Mesh( geometry, material );
+                                meshCube.position.z = -250;
+                                meshCube.position.y = 250;
+                                cube.add(meshCube);
+                                cube.add(Scene.vars.texte2);
+                                Scene.vars.cubeGroup = cube;
+                                vars.scene.add(cube);
+
                                 
                                 document.querySelector("#loading").remove();
                             });
-                           
+                          });
                         });
                     });
                 });
@@ -233,7 +238,11 @@ const Scene = {
         window.addEventListener('resize', Scene.onWindowResize, false); 
 
         //Mouvement de la souris
-        window.addEventListener('mousemove', Scene.onMouseMove, false); 
+        window.addEventListener('mousemove', Scene.onMouseMove, false);
+
+        //click de la souris sur le cube
+        window.addEventListener( 'mousedown', Scene.onMouseDown, false );
+        
 
         //Mise en place des controls et des limites
         vars.controls = new OrbitControls(vars.camera, vars.renderer.domElement);
@@ -248,8 +257,8 @@ const Scene = {
         vars.controls.update();
  
         //Mise en place des stats en haut à gauche de l'écran
-        vars.stats = new Stats();
-        vars.container.appendChild(vars.stats.dom);
+        // vars.stats = new Stats();
+        // vars.container.appendChild(vars.stats.dom);
 
         Scene.animate(); 
     },
@@ -351,52 +360,71 @@ const Scene = {
         Scene.vars.mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
         Scene.vars.mouse.y = -(event.clientY / window.innerHeight) * 2 + 1; 
     },
+    onMouseDown: (event) =>{
+        if (Scene.vars.goldGroup != undefined){
+
+            Scene.vars.mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+            Scene.vars.mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+            
+            // create an array containing all objects in the scene with which the ray intersects
+            let intersects = Scene.vars.raycaster.intersectObjects(Scene.vars.cubeGroup.children, true);
+            
+            // if there is one (or more) intersections
+            if ( intersects.length > 0 )
+            {
+                var color = new THREE.Color( 0xffffff );
+                color.setHex( Math.random() * 0xffffff );
+                Scene.vars.cubeGroup.children[0].material.color = new THREE.Color(color);
+            }
+        }
+    },
     //affiche une image; connecte la camera à la scene
     render: () => {
         Scene.vars.renderer.render(Scene.vars.scene, Scene.vars.camera);
-        Scene.vars.stats.update();
+        //Scene.vars.stats.update();
     } ,
     customAnimation:() =>{
-        Scene.vars.animPercent += Scene.vars.animSpeed;
-        if(Scene.vars.animPercent>1){
-            Scene.vars.animPercent = 1;
-            return;
-        }
-        if(Scene.vars.animPercent<0){
-            Scene.vars.animPercent = 0;
-        }
+        if (Scene.vars.goldGroup != undefined){
+            Scene.vars.animPercent += Scene.vars.animSpeed;
+            if(Scene.vars.animPercent>1){
+                Scene.vars.animPercent = 1;
+                return;
+            }
+            if(Scene.vars.animPercent<0){
+                Scene.vars.animPercent = 0;
+            }
 
-        if(Scene.vars.animPercent <= 0.33){
-            Scene.vars.plaquette.position.z = 45 + (25 * 3 * Scene.vars.animPercent);
-            Scene.vars.texte.position.z = 46 + (50 * 3 * Scene.vars.animPercent);
+            if(Scene.vars.animPercent <= 0.33){
+                Scene.vars.plaquette.position.z = 45 + (25 * 3 * Scene.vars.animPercent);
+                Scene.vars.texte.position.z = 46 + (50 * 3 * Scene.vars.animPercent);
 
+            }
+
+            if(Scene.vars.animPercent >= 0.20 && Scene.vars.animPercent <= 0.75){
+                //Socle et logo
+                let percent = (Scene.vars.animPercent -0.2) / 0.55;
+                Scene.vars.socle1.position.x = 25 * percent;
+                Scene.vars.socle2.position.x = -25 * percent;
+                Scene.vars.logo1.position.x = 45 + 50 *percent;
+                Scene.vars.logo2.position.x = -45 - 50 * percent;
+
+            }else if(Scene.vars.animPercent < 0.20){
+                //reset socle et logo
+                Scene.vars.socle1.position.x = 0;
+                Scene.vars.socle2.position.x = 0;
+                Scene.vars.logo1.position.x = 45;
+                Scene.vars.logo2.position.x = -45;
+            }
+
+            if(Scene.vars.animPercent >= 0.40){
+                //statuette
+                let percentage = (Scene.vars.animPercent - 0.4) / 0.6;
+                Scene.vars.statuette.position.y = 50 * percentage;
+            }else if(Scene.vars.animPercent < 0.7){
+                //reset Statuette
+                Scene.vars.statuette.position.y = 0;
+            }
         }
-
-        if(Scene.vars.animPercent >= 0.20 && Scene.vars.animPercent <= 0.75){
-            //Socle et logo
-            let percent = (Scene.vars.animPercent -0.2) / 0.55;
-            Scene.vars.socle1.position.x = 25 * percent;
-            Scene.vars.socle2.position.x = -25 * percent;
-            Scene.vars.logo1.position.x = 45 + 50 *percent;
-            Scene.vars.logo2.position.x = -45 - 50 * percent;
-
-        }else if(Scene.vars.animPercent < 0.20){
-            //reset socle et logo
-            Scene.vars.socle1.position.x = 0;
-            Scene.vars.socle2.position.x = 0;
-            Scene.vars.logo1.position.x = 45;
-            Scene.vars.logo2.position.x = -45;
-        }
-
-        if(Scene.vars.animPercent >= 0.40){
-            //statuette
-            let percentage = (Scene.vars.animPercent - 0.4) / 0.6;
-            Scene.vars.statuette.position.y = 50 * percentage;
-        }else if(Scene.vars.animPercent < 0.7){
-            //reset Statuette
-            Scene.vars.statuette.position.y = 0;
-        }
-       
     },
     //rafraîchir l'écran régulièrement
     animate: () => {
@@ -421,7 +449,7 @@ const Scene = {
                 Scene.vars.animSpeed = -0.05;
             }
         }
-            
+
         Scene.render();
     }
 
