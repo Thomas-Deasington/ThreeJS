@@ -375,8 +375,12 @@ const Scene = {
                 var color = new THREE.Color( 0xffffff );
                 color.setHex( Math.random() * 0xffffff );
                 Scene.vars.cubeGroup.children[0].material.color = new THREE.Color(color);
+                Scene.animationCube();
             }
         }
+    },
+    animationCube: () =>{
+
     },
     //affiche une image; connecte la camera à la scene
     render: () => {
