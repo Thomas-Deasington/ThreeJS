@@ -1,5 +1,6 @@
 # ThreeJS
-Projet en ThreeJS
+Projet en ThreeJS.
+
 Il faut mettre du son pour le projet (pas trop fort).
 
 A partir de la scène originale, j'ai rajouté un cube qui sert de bouton play.
