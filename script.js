@@ -16,6 +16,11 @@ const Scene = {
         raycaster: new THREE.Raycaster(),
         animSpeed: null,
         animPercent: null,
+        directional: null,
+        directional2: null,
+        directional3: null,
+        nuit: false,
+        compteurNuit: 0,
     },
     init: () => {
         let vars = Scene.vars;
@@ -51,12 +56,16 @@ const Scene = {
 
 
          //Lumière directionnelle
-         let lightIntensity = 0.5;
+         let lightIntensity = 0.6;
          let d = 1000;
          let directional = new THREE.DirectionalLight(0xFF5733, lightIntensity);
          let directional2 = new THREE.DirectionalLight(0x62FF33, lightIntensity);
          let directional3 = new THREE.DirectionalLight(0xFF33E9, lightIntensity);
-        
+
+         vars.directional = directional;
+         vars.directional2 = directional2;
+         vars.directional3 = directional3;
+
          directional.castShadow = true;
          directional.shadow.camera.left =-d;
          directional.shadow.camera.right = d;
@@ -377,11 +386,68 @@ const Scene = {
                 var color = new THREE.Color( 0xffffff );
                 color.setHex( Math.random() * 0xffffff );
                 Scene.vars.cubeGroup.children[0].material.color = new THREE.Color(color);
-                var compteur = 0;
-                while(compteur!=300){
-                    Scene.vars.silverGroup.children[2].rotation.x -= 1;
-                    Scene.vars.bronzeGroup.children[2].rotation.x -= 1;  
-                    compteur++;
+                if(Scene.vars.directional != undefined){
+                    if(Scene.vars.compteurNuit <10){
+                        if(Scene.vars.nuit == false){
+                            Scene.vars.directional.color.setHex(0x000000);  
+                            Scene.vars.directional2.color.setHex(0x000000);  
+                            Scene.vars.directional3.color.setHex(0x000000);
+                            var son = 'sounds/nuit.mp3';
+                            Scene.vars.nuit = true;
+                            Scene.vars.compteurNuit ++;
+                        }
+                        else{
+                            Scene.vars.directional.color.setHex(0xFF5733);  
+                            Scene.vars.directional2.color.setHex(0x62FF33);  
+                            Scene.vars.directional3.color.setHex(0xFF33E9);
+                            var son = 'sounds/jour.mp3';
+                            Scene.vars.nuit = false;
+                            Scene.vars.compteurNuit ++;
+                        }
+                    }
+                    else{
+                        Scene.vars.directional.color.setHex(0xFF5733);  
+                        Scene.vars.directional2.color.setHex(0x62FF33);  
+                        Scene.vars.directional3.color.setHex(0xFF33E9);
+                        Scene.vars.compteurNuit ++;
+                    }
+                }
+                
+
+                // create an AudioListener and add it to the camera
+                var listener = new THREE.AudioListener();
+                Scene.vars.camera.add( listener );
+
+                // create a global audio source
+                var sound = new THREE.Audio( listener );
+
+                // load a sound and set it as the Audio object's buffer
+                var audioLoader = new THREE.AudioLoader();
+
+                if(Scene.vars.compteurNuit == 11){
+                    var son = 'sounds/chut.mp3';
+                    audioLoader.load(son, function( buffer ) {
+                        sound.setBuffer( buffer );
+                        sound.setVolume( 0.5 );
+                        sound.play();
+                    });
+                }
+                else if(Scene.vars.compteurNuit == 12){
+                    audioLoader.load('sounds/C-est vraiment pô nice - Mister V [Mpgun (mp3cut.net).mp3', function( buffer ) {
+                    sound.setBuffer( buffer );
+                    sound.setVolume( 0.5 );
+                    sound.play();
+                    Scene.vars.compteurNuit++;
+                    Scene.vars.cubeGroup.position.y = -600;
+
+                });
+                }
+                else if(Scene.vars.compteurNuit <12){
+                    audioLoader.load(son, function( buffer ) {
+                        sound.setBuffer( buffer );
+                        sound.setVolume( 0.5 );
+                        sound.play();
+                    });
                 }
             }
         }
