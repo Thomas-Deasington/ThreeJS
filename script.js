@@ -21,6 +21,8 @@ const Scene = {
         directional3: null,
         nuit: false,
         compteurNuit: 0,
+        chute: false,
+        enterre: false,
     },
     init: () => {
         let vars = Scene.vars;
@@ -426,6 +428,7 @@ const Scene = {
 
                 if(Scene.vars.compteurNuit == 11){
                     var son = 'sounds/chut.mp3';
+                    Scene.vars.chute = true;
                     audioLoader.load(son, function( buffer ) {
                         sound.setBuffer( buffer );
                         sound.setVolume( 0.5 );
@@ -433,6 +436,7 @@ const Scene = {
                     });
                 }
                 else if(Scene.vars.compteurNuit == 12){
+                    Scene.vars.enterre = true;
                     audioLoader.load('sounds/C-est vraiment pô nice - Mister V [Mpgun (mp3cut.net).mp3', function( buffer ) {
                     sound.setBuffer( buffer );
                     sound.setVolume( 0.5 );
@@ -457,6 +461,16 @@ const Scene = {
         Scene.vars.renderer.render(Scene.vars.scene, Scene.vars.camera);
         //Scene.vars.stats.update();
     } ,
+    chuteAnimation:() =>{
+        if(Scene.vars.chute){
+            Scene.vars.bronzeGroup.children[2].rotation.y -= 0.1;
+            Scene.vars.silverGroup.children[2].rotation.y -= 0.1;
+        }
+        if(Scene.vars.enterre){
+            Scene.vars.bronzeGroup.children[2].position.y = -100;
+            Scene.vars.silverGroup.children[2].position.y = -100;
+        }
+    },
     customAnimation:() =>{
         if (Scene.vars.goldGroup != undefined){
             Scene.vars.animPercent += Scene.vars.animSpeed;
@@ -504,6 +518,7 @@ const Scene = {
     animate: () => {
         requestAnimationFrame(Scene.animate);
         Scene.customAnimation();
+        Scene.chuteAnimation();
         Scene.vars.raycaster.setFromCamera(Scene.vars.mouse, Scene.vars.camera);
         if (Scene.vars.goldGroup != undefined){
             let intersects = Scene.vars.raycaster.intersectObjects(Scene.vars.goldGroup.children, true);
